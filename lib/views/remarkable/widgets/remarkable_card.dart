@@ -91,7 +91,6 @@ class _RemarkableCardState extends State<RemarkableCard> {
       String? path;
 
       // Find first IMAGE media (not video)
-      // Tìm media đầu tiên là IMAGE (không phải video)
       if (observations.isNotEmpty) {
         for (final obs in observations) {
           if (obs.media.isNotEmpty) {

@@ -25,7 +25,7 @@ class _MapPickerViewState extends State<MapPickerView> {
     _initializeWebView();
   }
 
-  // Get current location and send to map - Lấy vị trí hiện tại và gửi vào map
+  // Get current location and send to map
   Future<void> _getCurrentLocationAndSendToMap() async {
     if (_isGettingLocation) return;
 
@@ -33,14 +33,14 @@ class _MapPickerViewState extends State<MapPickerView> {
       _isGettingLocation = true;
     });
 
-    // Default location - Hanoi (Vị trí mặc định khi GPS fail)
+    // Default location - Hanoi (default fallback when GPS fails)
     const double defaultLat = 21.023989;
     const double defaultLon = 105.790357;
 
     try {
       print('🌍 [FLUTTER] Getting current location from device...');
 
-      // Get current position from device - Lấy vị trí từ thiết bị
+      // Get current position from device
       final position = await _locationService.getCurrentLocation();
 
       double lat;
@@ -50,7 +50,7 @@ class _MapPickerViewState extends State<MapPickerView> {
       Color snackBarColor;
 
       if (position != null) {
-        // GPS success - Lấy GPS thành công
+        // GPS success
         lat = position.latitude;
         lon = position.longitude;
         popupText = '📍 Your Current Location (from device)';
@@ -59,7 +59,7 @@ class _MapPickerViewState extends State<MapPickerView> {
 
         print('✅ [FLUTTER] Got GPS location: $lat, $lon');
       } else {
-        // GPS failed - Use default location - GPS thất bại, dùng vị trí mặc định
+        // GPS failed - use default location
         lat = defaultLat;
         lon = defaultLon;
         popupText = '📍 Default Location (Hanoi)';
@@ -69,11 +69,11 @@ class _MapPickerViewState extends State<MapPickerView> {
         print('⚠️ [FLUTTER] GPS failed. Using default location: $lat, $lon');
       }
 
-      // Send to map via JavaScript - Gửi vào map qua JavaScript
+      // Send to map via JavaScript
       final jsCode = '''
         (function() {
           try {
-            // Set location from Flutter - Đặt vị trí từ Flutter
+            // Set location from Flutter
             if (typeof startLatLng !== 'undefined') {
               startLatLng = L.latLng($lat, $lon);
               if (typeof startMarker !== 'undefined') {
@@ -104,7 +104,7 @@ class _MapPickerViewState extends State<MapPickerView> {
       print('❌ [FLUTTER] Error getting location: $e');
       print('⚠️ [FLUTTER] Falling back to default location');
 
-      // Exception - Fall back to default location - Lỗi exception, dùng vị trí mặc định
+      // Exception - fallback to default location
       final jsCode = '''
         (function() {
           try {
@@ -154,7 +154,7 @@ class _MapPickerViewState extends State<MapPickerView> {
           try {
             print('🗺️ [MAP] RAW MESSAGE: ${message.message}');
 
-            // Sử dụng WebMapService để parse message
+            // Using WebMapService to parse message
             final data = _webMapService.parseMapPickerMessage(message.message);
 
             if (data == null) {
@@ -180,7 +180,7 @@ class _MapPickerViewState extends State<MapPickerView> {
 
             print('📤 [MAP] Returning location data to form');
 
-            // Return the picked location to the previous screen
+            // Return picked location to previous screen
             Navigator.of(context).pop(data);
           } catch (e) {
             print('❌ [MAP] ERROR: $e');
@@ -199,8 +199,8 @@ class _MapPickerViewState extends State<MapPickerView> {
               _isLoading = false;
             });
 
-            // Get current location from device and send to map - Lấy vị trí hiện tại và gửi vào map
-            // Delay to ensure map JavaScript is fully loaded
+            // Get current location from device and send to map
+            // Delay ensures map JavaScript is fully loaded
             Future.delayed(const Duration(milliseconds: 1500), () {
               _getCurrentLocationAndSendToMap();
             });
@@ -233,10 +233,10 @@ class _MapPickerViewState extends State<MapPickerView> {
                   title: const Text('How to use'),
                   content: const Text(
                     '1. App will auto-detect your current location\n'
-                    '2. Or use the GPS button to refresh location\n'
-                    '3. Search for a location using the search bar\n'
-                    '4. Or tap anywhere on the map to pick\n'
-                    '5. Tap confirm button to save location',
+                        '2. Or use the GPS button to refresh location\n'
+                        '3. Search for a location using the search bar\n'
+                        '4. Or tap anywhere on the map to pick\n'
+                        '5. Tap confirm button to save location',
                   ),
                   actions: [
                     TextButton(
@@ -254,7 +254,7 @@ class _MapPickerViewState extends State<MapPickerView> {
         children: [
           WebViewWidget(controller: _controller),
 
-          // Loading indicator - Hiển thị khi đang load map
+          // Loading indicator
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(
@@ -262,7 +262,7 @@ class _MapPickerViewState extends State<MapPickerView> {
               ),
             ),
 
-          // Floating GPS button - Nút GPS nổi để refresh vị trí
+          // Floating GPS button for refreshing location
           Positioned(
             bottom: 20,
             left: 20,
@@ -272,13 +272,13 @@ class _MapPickerViewState extends State<MapPickerView> {
               backgroundColor: const Color(0xFF2C5E1A),
               child: _isGettingLocation
                   ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
                   : const Icon(Icons.my_location, color: Colors.white),
             ),
           ),
@@ -287,4 +287,3 @@ class _MapPickerViewState extends State<MapPickerView> {
     );
   }
 }
-

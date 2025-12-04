@@ -2,51 +2,54 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/hike.dart';
 import '../models/ai_suggestion.dart';
 import '../models/weather_data.dart';
 import '../db/app_db.dart';
 
-/// Service để gọi AI backend (Python FastAPI)
+/// Service for calling AI backend (Python FastAPI)
 class AIService {
-  // URL của AI backend - Backend đang chạy tại localhost:8000
-  // Đang dùng 10.0.2.2 cho Android Emulator (10.0.2.2 = localhost của máy host)
+  // Load AI backend URL from environment variables
+  // Backend runs at localhost:8000
+  // Using 10.0.2.2 for Android Emulator (10.0.2.2 = host machine localhost)
 
-  static const String _baseUrl = 'http://10.0.2.2:8000'; // Android Emulator ✅
+  static String get _baseUrl => dotenv.env['AI_SERVICE_BASE_URL'] ?? 'http://10.0.2.2:8000';
 
-  // Thay đổi URL tùy theo thiết bị bạn đang test:
-  // static const String _baseUrl = 'http://localhost:8000'; // iOS Simulator & Desktop
-  // static const String _baseUrl = 'http://127.0.0.1:8000'; // Alternative localhost
-  // static const String _baseUrl = 'http://192.168.1.100:8000'; // Real device (thay bằng IP máy tính của bạn)
+  // Change URL in .env file depending on the device you are testing:
+  // Android Emulator: http://10.0.2.2:8000
+  // iOS Simulator & Desktop: http://localhost:8000
+  // Alternative localhost: http://127.0.0.1:8000
+  // Real device: http://YOUR_COMPUTER_IP:8000 (replace with your computer IP)
 
   static const String _evaluateEndpoint = '/api/hike-ai/evaluate';
 
-  /// Lấy AI suggestion cho một hike
-  /// Nếu đã có trong database, trả về kết quả đã lưu
-  /// Nếu chưa có, gọi API để tạo mới và lưu vào database
+  /// Get AI suggestion for a hike
+  /// If already exists in database, return the saved result
+  /// If not exists, call API to create new one and save to database
   static Future<AISuggestion?> getOrGenerateAISuggestion(Hike hike) async {
     if (hike.id == null) {
       throw Exception('Hike must have an ID');
     }
 
-    // Kiểm tra xem đã có AI suggestion chưa
+    // Check if AI suggestion already exists
     final existingSuggestion = await AppDatabase.instance.getAISuggestionByHikeId(hike.id!);
     if (existingSuggestion != null) {
       return existingSuggestion;
     }
 
-    // Nếu chưa có, gọi API để tạo mới
+    // If not exists, call API to create new one
     return await generateAISuggestion(hike);
   }
 
-  /// Gọi API để tạo AI suggestion mới
+  /// Call API to create new AI suggestion
   static Future<AISuggestion?> generateAISuggestion(Hike hike) async {
     if (hike.id == null) {
       throw Exception('Hike must have an ID');
     }
 
     try {
-      // Lấy weather data từ database
+      // Fetch weather data from database
       final weatherMaps = await AppDatabase.instance.getWeatherForecastsByHike(hike.id!);
       final List<Map<String, dynamic>> weatherData = weatherMaps.map((map) {
         return {
@@ -60,7 +63,7 @@ class AIService {
         };
       }).toList();
 
-      // Chuẩn bị request body
+      // Prepare request body
       final requestBody = {
         'id': hike.id,
         'name': hike.name,
@@ -74,7 +77,7 @@ class AIService {
         'weather': weatherData,
       };
 
-      // Gọi API
+      // Call API
       final url = Uri.parse('$_baseUrl$_evaluateEndpoint');
       final response = await http.post(
         url,
@@ -93,7 +96,7 @@ class AIService {
         final responseData = json.decode(response.body);
         final suggestion = AISuggestion.fromJson(responseData, hike.id!);
 
-        // Lưu vào database
+        // Save to database
         final suggestionId = await AppDatabase.instance.insertAISuggestion(suggestion);
         return suggestion.copyWith(id: suggestionId);
       } else {
@@ -105,20 +108,20 @@ class AIService {
     }
   }
 
-  /// Xóa AI suggestion và tạo lại (refresh)
+  /// Delete existing AI suggestion and regenerate (refresh)
   static Future<AISuggestion?> regenerateAISuggestion(Hike hike) async {
     if (hike.id == null) {
       throw Exception('Hike must have an ID');
     }
 
-    // Xóa suggestion cũ
+    // Delete old suggestion
     await AppDatabase.instance.deleteAISuggestionByHikeId(hike.id!);
 
-    // Tạo mới
+    // Generate new one
     return await generateAISuggestion(hike);
   }
 
-  /// Kiểm tra xem AI service có hoạt động không
+  /// Check whether the AI service is operational
   static Future<bool> checkHealth() async {
     try {
       final url = Uri.parse('$_baseUrl/health');

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../models/ai_suggestion.dart';
 import '../../models/hike.dart';
 
-/// Chi tiết trang hiển thị AI suggestion đầy đủ
+/// Detailed page displaying full AI suggestion
 class AISuggestionDetailPage extends StatelessWidget {
   final AISuggestion suggestion;
   final Hike hike;
@@ -24,7 +24,7 @@ class AISuggestionDetailPage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App Bar với gradient
+          // App Bar with gradient
           SliverAppBar(
             expandedHeight: 200,
             pinned: true,
@@ -500,4 +500,3 @@ class AISuggestionDetailPage extends StatelessWidget {
     );
   }
 }
-

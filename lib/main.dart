@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'views/splash/splash.dart';
 import 'viewmodels/hike_viewmodel.dart';
 import 'viewmodels/observation_viewmodel.dart';
@@ -10,6 +11,9 @@ import 'viewmodels/theme_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables from .env file
+  await dotenv.load(fileName: ".env");
 
   final themeModel = ThemeViewModel();
   await themeModel.loadTheme();

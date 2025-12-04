@@ -4,7 +4,7 @@ import '../plan/plan_view.dart';
 import '../remarkable/remarkable_view.dart';
 import '../settings/settings_view.dart';
 
-// Đây là StatefulWidget vì nó cần quản lý trạng thái của tab hiện tại
+// This is a StatefulWidget because it needs to manage the state of the current tab
 class MainNavbar extends StatefulWidget {
   const MainNavbar({super.key});
 
@@ -13,9 +13,9 @@ class MainNavbar extends StatefulWidget {
 }
 
 class _MainNavbarState extends State<MainNavbar> {
-  int _currentIndex = 0; // State: Index của tab hiện tại
+  int _currentIndex = 0; // State: Index of the current tab
 
-  // Danh sách các màn hình tương ứng với các tab
+  // List of screens corresponding to the tabs
   final List<Widget> _screens = [
     const FeedView(), // Feed = isComplete == true
     const PlanView(), // Plan = isComplete == false
@@ -29,7 +29,7 @@ class _MainNavbarState extends State<MainNavbar> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
 
-      // Hiển thị màn hình tương ứng với index hiện tại với animation
+      // Display the screen corresponding to the current index with animation
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         switchInCurve: Curves.easeInOut,
@@ -37,7 +37,7 @@ class _MainNavbarState extends State<MainNavbar> {
         child: _screens[_currentIndex],
       ),
 
-      // Feature 3: BottomNavigationBar hiện đại với Light Theme
+      // Feature 3: Modern BottomNavigationBar with Light Theme
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
@@ -60,26 +60,26 @@ class _MainNavbarState extends State<MainNavbar> {
                 _buildNavItem(icon: Icons.map_rounded, label: 'Plan', index: 1),
                 _buildNavItem(icon: Icons.star_rounded, label: 'Remarkable', index: 2),
                 _buildNavItem(icon: Icons.settings_rounded, label: 'Settings', index: 3),
-               ],
-             ),
-           ),
-         ),
-       ),
-     );
-   }
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-  // Custom nav item với animation đẹp
+  // Custom nav item with smooth animation
   Widget _buildNavItem({
     required IconData icon,
     required String label,
     required int index,
     Color? color,
   }) {
-     final isSelected = _currentIndex == index;
-     final theme = Theme.of(context);
+    final isSelected = _currentIndex == index;
+    final theme = Theme.of(context);
     final selColor = color ?? theme.colorScheme.primary;
 
-     return GestureDetector(
+    return GestureDetector(
       onTap: () {
         setState(() {
           _currentIndex = index;
@@ -116,9 +116,9 @@ class _MainNavbarState extends State<MainNavbar> {
               ),
               child: Text(label),
             ),
-           ],
-         ),
-       ),
-     );
-   }
- }
+          ],
+        ),
+      ),
+    );
+  }
+}

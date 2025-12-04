@@ -4,12 +4,12 @@ import 'media_item.dart';
 
 class Observation {
   int? id;
-  int hikeId; // Khoá ngoại liên kết với Hike
+  int hikeId; // Foreign key linking to Hike
   String caption;
   String content;
-  String time; // Thời gian quan sát
+  String time; // Observation timestamp
 
-  List<MediaItem> media; // Danh sách media (ảnh/video)
+  List<MediaItem> media; // List of media (images/videos)
 
   Observation({
     this.id,
@@ -17,10 +17,10 @@ class Observation {
     required this.caption,
     required this.content,
     required this.time,
-    this.media = const [], // Khởi tạo rỗng
+    this.media = const [], // Initialize as empty
   });
 
-  // Chuyển đổi đối tượng Observation thành Map
+  // Convert Observation object to Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -28,11 +28,11 @@ class Observation {
       'caption': caption,
       'content': content,
       'time': time,
-      // Lưu ý: media không được lưu trực tiếp ở đây, mà được lưu trong bảng riêng.
+      // Note: media is not saved directly here, but stored in a separate table.
     };
   }
 
-  // Tạo đối tượng Observation từ Map
+  // Create Observation object from Map
   factory Observation.fromMap(Map<String, dynamic> map) {
     return Observation(
       id: map['id'] as int?,
@@ -40,7 +40,7 @@ class Observation {
       caption: map['caption'] as String,
       content: map['content'] as String,
       time: map['time'] as String,
-      // media sẽ được thêm vào sau khi lấy từ DbHelper
+      // media will be added after fetching from DbHelper
       media: [],
     );
   }

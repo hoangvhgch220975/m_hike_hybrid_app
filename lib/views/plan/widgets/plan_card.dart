@@ -451,7 +451,7 @@ class PlanCard extends StatelessWidget {
     }
   }
 
-  /// Show AI summary dialog với nút "View Details"
+
   void _showAISummaryDialog(BuildContext context, AISuggestion suggestion) {
     showDialog(
       context: context,

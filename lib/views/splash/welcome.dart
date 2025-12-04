@@ -56,12 +56,12 @@ class WelcomeScreen extends StatelessWidget {
                       ],
                     ),
 
-                    // Button Explore
+                    // Explore Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          // Lưu trạng thái đã xem welcome screen
+                          // Save the state that the welcome screen has been viewed
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('has_seen_welcome', true);
 
@@ -71,7 +71,7 @@ class WelcomeScreen extends StatelessWidget {
                             PageRouteBuilder(
                               pageBuilder: (context, animation, secondaryAnimation) => const MainNavbar(),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                // Slide transition từ phải sang trái (như mở app mới)
+                                // Slide transition from right to left (like opening a new app)
                                 const slideBegin = Offset(0.15, 0.0);
                                 const slideEnd = Offset.zero;
                                 const slideCurve = Curves.easeOutCubic;
@@ -79,7 +79,7 @@ class WelcomeScreen extends StatelessWidget {
                                 var slideTween = Tween(begin: slideBegin, end: slideEnd).chain(CurveTween(curve: slideCurve));
                                 var slideAnimation = animation.drive(slideTween);
 
-                                // Fade transition mượt mà
+                                // Smooth fade transition
                                 const fadeBegin = 0.0;
                                 const fadeEnd = 1.0;
                                 const fadeCurve = Curves.easeInOutCubic;
@@ -87,7 +87,7 @@ class WelcomeScreen extends StatelessWidget {
                                 var fadeTween = Tween(begin: fadeBegin, end: fadeEnd).chain(CurveTween(curve: fadeCurve));
                                 var fadeAnimation = animation.drive(fadeTween);
 
-                                // Scale transition nhẹ để tạo độ sâu
+                                // Slight scale transition for depth effect
                                 const scaleBegin = 0.94;
                                 const scaleEnd = 1.0;
 
@@ -114,7 +114,11 @@ class WelcomeScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
                         ),
-                        child: Text('Explore', style: theme.textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
+                        child: Text(
+                          'Explore',
+                          style: theme.textTheme.bodyLarge
+                              ?.copyWith(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                        ),
                       ),
                     ),
 

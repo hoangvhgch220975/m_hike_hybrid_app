@@ -3,22 +3,22 @@
 import 'observation.dart';
 
 class Hike {
-  int? id; // ID trong cơ sở dữ liệu (có thể null khi tạo mới)
+  int? id; // ID in database (can be null when newly created)
   String name;
   String location;
-  String date; // Nên lưu dưới dạng String hoặc int (timestamp)
+  String date; // Should be stored as String or int (timestamp)
   double length;
   String difficulty;
   String? description;
-  bool isComplete; // Dùng để lọc Feed/Plan
-  bool isRemarkable; // Dùng để lọc Remarkable
-  bool hasParking; // New: Có chỗ đỗ xe hay không (yes/no)
-  int? estimatedDuration; // New: Số ngày dự kiến (duration in days) - nullable for backward compatibility
+  bool isComplete; // Used for filtering Feed/Plan
+  bool isRemarkable; // Used for filtering Remarkable
+  bool hasParking; // New: Whether parking is available (yes/no)
+  int? estimatedDuration; // New: Estimated days (duration in days) - nullable for backward compatibility
   double? latitude; // Latitude from map picker
   double? longitude; // Longitude from map picker
-  bool isMapPicked; // Flag to indicate if location was picked from map
-  bool isLengthFromMap; // Flag to indicate if length was calculated from map
-  List<Observation> observations; // Danh sách observations liên quan
+  bool isMapPicked; // Flag indicating if location was selected from map
+  bool isLengthFromMap; // Flag indicating if length was calculated from map
+  List<Observation> observations; // List of related observations
 
   Hike({
     this.id,
@@ -36,10 +36,10 @@ class Hike {
     this.longitude,
     this.isMapPicked = false,
     this.isLengthFromMap = false,
-    this.observations = const [], // Khởi tạo rỗng
+    this.observations = const [], // Initialize empty
   });
 
-  // Chuyển đổi đối tượng Hike thành Map để lưu vào SQLite
+  // Convert Hike object to Map for SQLite storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -49,7 +49,7 @@ class Hike {
       'length': length,
       'difficulty': difficulty,
       'description': description,
-      // Lưu bool dưới dạng int (1 cho true, 0 cho false) trong SQLite
+      // Store bool as int (1 for true, 0 for false) in SQLite
       'isComplete': isComplete ? 1 : 0,
       'isRemarkable': isRemarkable ? 1 : 0,
       'hasParking': hasParking ? 1 : 0,
@@ -60,9 +60,9 @@ class Hike {
     };
   }
 
-  // Tạo đối tượng Hike từ Map đọc từ SQLite
+  // Create a Hike object from SQLite Map
   factory Hike.fromMap(Map<String, dynamic> map) {
-    // length in DB may be stored as int or real; handle both
+    // length in DB may be int or real; handle both
     double parsedLength = 0.0;
     try {
       if (map['length'] is num) {
@@ -82,13 +82,13 @@ class Hike {
       return s == '1' || s == 'true' || s == 'yes';
     }
 
-    // Parse estimatedDuration - return null if not present (for backward compatibility)
+    // Parse estimatedDuration - return null if missing (backward compatibility)
     int? parsedDuration;
     try {
       if (map.containsKey('estimatedDuration') && map['estimatedDuration'] != null) {
         parsedDuration = map['estimatedDuration'] is int
-          ? map['estimatedDuration'] as int
-          : int.tryParse(map['estimatedDuration'].toString());
+            ? map['estimatedDuration'] as int
+            : int.tryParse(map['estimatedDuration'].toString());
       }
     } catch (_) {
       parsedDuration = null;
@@ -121,7 +121,7 @@ class Hike {
       length: parsedLength,
       difficulty: map['difficulty'] as String,
       description: map['description'] as String?,
-      // Chuyển int thành bool
+      // Convert int to bool
       isComplete: parseBool(map['isComplete']),
       isRemarkable: parseBool(map['isRemarkable']),
       hasParking: parseBool(map['hasParking']),
@@ -129,7 +129,7 @@ class Hike {
       latitude: parsedLat,
       longitude: parsedLon,
       isMapPicked: map.containsKey('isMapPicked') ? parseBool(map['isMapPicked']) : false,
-      // observations sẽ được thêm vào sau khi lấy từ database
+      // observations will be injected later after loading from DB
       observations: [],
     );
   }

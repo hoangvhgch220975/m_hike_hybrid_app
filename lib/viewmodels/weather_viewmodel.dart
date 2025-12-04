@@ -70,11 +70,11 @@ class WeatherViewModel extends ChangeNotifier {
 
   // Get weather forecast for duration days
   Future<void> getForecastForDuration(
-    double lat,
-    double lon,
-    DateTime startDate,
-    int durationDays,
-  ) async {
+      double lat,
+      double lon,
+      DateTime startDate,
+      int durationDays,
+      ) async {
     isLoading = true;
     errorMessage = null;
     forecastList = [];
@@ -104,12 +104,12 @@ class WeatherViewModel extends ChangeNotifier {
 
   // Fetch and save weather forecast for a hike (by coordinates)
   Future<bool> fetchAndSaveWeatherForHike(
-    int hikeId,
-    double lat,
-    double lon,
-    DateTime startDate,
-    int durationDays,
-  ) async {
+      int hikeId,
+      double lat,
+      double lon,
+      DateTime startDate,
+      int durationDays,
+      ) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -144,12 +144,12 @@ class WeatherViewModel extends ChangeNotifier {
 
   // Fetch and save weather forecast for a hike (by coordinates) - Alias method
   Future<bool> fetchAndSaveWeatherForHikeByCoordinates(
-    int hikeId,
-    double lat,
-    double lon,
-    DateTime startDate,
-    int durationDays,
-  ) async {
+      int hikeId,
+      double lat,
+      double lon,
+      DateTime startDate,
+      int durationDays,
+      ) async {
     // This is just an alias to the existing method for better naming clarity
     return await fetchAndSaveWeatherForHike(
       hikeId,
@@ -162,11 +162,11 @@ class WeatherViewModel extends ChangeNotifier {
 
   // Fetch and save weather forecast for a hike (by location name)
   Future<bool> fetchAndSaveWeatherForHikeByLocation(
-    int hikeId,
-    String locationName,
-    DateTime startDate,
-    int durationDays,
-  ) async {
+      int hikeId,
+      String locationName,
+      DateTime startDate,
+      int durationDays,
+      ) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -199,7 +199,7 @@ class WeatherViewModel extends ChangeNotifier {
   }
 
   // Load stored weather forecasts for a hike
-  // Load dự báo thời tiết đã lưu cho một hike
+  // Load stored weather forecast for a hike
   Future<void> loadStoredForecasts(int hikeId) async {
     if (hikeId <= 0) {
       debugPrint('Invalid hikeId: $hikeId');
@@ -242,4 +242,3 @@ class WeatherViewModel extends ChangeNotifier {
   // Check if weather data is available
   bool get hasWeatherData => currentWeather != null || forecastList.isNotEmpty;
 }
-

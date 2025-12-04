@@ -1,17 +1,17 @@
 // lib/models/weather_data.dart
 
-/// Model dữ liệu thời tiết
+/// Weather data model
 class WeatherData {
-  int? id; // ID trong database (null khi chưa lưu)
-  int? hikeId; // Foreign key đến bảng hikes
-  final double temperature;        // Nhiệt độ (°C)
-  final String condition;          // Tình trạng thời tiết (Sunny, Cloudy, Rain, etc.)
-  final String description;        // Mô tả chi tiết
-  final double humidity;           // Độ ẩm (%)
-  final double windSpeed;          // Tốc độ gió (km/h)
-  final String icon;               // Icon code từ API
-  final DateTime timestamp;        // Thời gian lấy dữ liệu
-  final String forecastDate;       // Ngày dự báo (YYYY-MM-DD format)
+  int? id; // ID in database (null when not saved yet)
+  int? hikeId; // Foreign key to hikes table
+  final double temperature;        // Temperature (°C)
+  final String condition;          // Weather condition (Sunny, Cloudy, Rain, etc.)
+  final String description;        // Detailed description
+  final double humidity;           // Humidity (%)
+  final double windSpeed;          // Wind speed (km/h)
+  final String icon;               // Icon code from API
+  final DateTime timestamp;        // Time when data was retrieved
+  final String forecastDate;       // Forecast date (YYYY-MM-DD format)
 
   WeatherData({
     this.id,
@@ -26,12 +26,11 @@ class WeatherData {
     required this.forecastDate,
   });
 
-  /// Tạo WeatherData từ JSON API
   /// Create WeatherData from API JSON
   factory WeatherData.fromJson(
-    Map<String, dynamic> json, {
-    DateTime? hikeDate, // Hike plan date (from date field in hikes table)
-  }) {
+      Map<String, dynamic> json, {
+        DateTime? hikeDate, // Hike plan date (from date field in hikes table)
+      }) {
     // Handle both current weather and forecast API responses
     final main = json['main'];
     final weather = json['weather'][0];
@@ -64,7 +63,7 @@ class WeatherData {
     );
   }
 
-  /// Chuyển đối tượng WeatherData thành Map để lưu vào SQLite
+  /// Convert WeatherData object to Map for saving into SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -80,7 +79,7 @@ class WeatherData {
     };
   }
 
-  /// Tạo đối tượng WeatherData từ Map đọc từ SQLite
+  /// Create WeatherData object from Map read from SQLite
   factory WeatherData.fromMap(Map<String, dynamic> map) {
     return WeatherData(
       id: map['id'] as int?,
@@ -96,12 +95,12 @@ class WeatherData {
     );
   }
 
-  /// Lấy icon URL từ OpenWeatherMap
+  /// Get icon URL from OpenWeatherMap
   String getIconUrl() {
     return 'https://openweathermap.org/img/wn/$icon@2x.png';
   }
 
-  /// Lấy icon emoji dựa trên condition
+  /// Get emoji icon based on condition
   String getEmoji() {
     switch (condition.toLowerCase()) {
       case 'clear':
@@ -150,4 +149,3 @@ class WeatherData {
     );
   }
 }
-

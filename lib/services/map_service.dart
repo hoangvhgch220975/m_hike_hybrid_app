@@ -7,11 +7,11 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Service xử lý các thao tác liên quan đến Google Maps và Geocoding
+/// Service for handling operations related to Google Maps and Geocoding
 class MapService {
   GoogleMapController? _mapController;
 
-  /// Lưu trữ Google Maps controller
+  /// Store Google Maps controller
   void setMapController(GoogleMapController controller) {
     _mapController = controller;
   }
@@ -59,15 +59,15 @@ class MapService {
   // GEOCODING & ROUTING API
   // ============================================================================
 
-  /// Reverse Geocoding: Lấy tên địa điểm từ tọa độ
+  /// Reverse Geocoding: Get location name from coordinates
   ///
-  /// Sử dụng Nominatim API (OpenStreetMap) để chuyển đổi
-  /// tọa độ (lat, lon) thành tên địa điểm chi tiết.
+  /// Use Nominatim API (OpenStreetMap) to convert
+  /// coordinates (lat, lon) into detailed location name.
   ///
-  /// [lat] - Vĩ độ
-  /// [lon] - Kinh độ
+  /// [lat] - Latitude
+  /// [lon] - Longitude
   ///
-  /// Returns: Tên địa điểm hoặc null nếu thất bại
+  /// Returns: Location name or null if failed
   Future<String?> reverseGeocode(double lat, double lon) async {
     try {
       final url = Uri.parse(
@@ -94,15 +94,15 @@ class MapService {
     }
   }
 
-  /// Forward Geocoding: Tìm kiếm địa điểm theo tên
+  /// Forward Geocoding: Search location by name
   ///
-  /// Sử dụng Nominatim API để tìm kiếm các địa điểm
-  /// phù hợp với query string.
+  /// Use Nominatim API to search for locations
+  /// matching the query string.
   ///
-  /// [query] - Chuỗi tìm kiếm (tên địa điểm, địa chỉ)
-  /// [limit] - Số lượng kết quả tối đa (mặc định: 10)
+  /// [query] - Search string (location name, address)
+  /// [limit] - Maximum number of results (default: 10)
   ///
-  /// Returns: Danh sách các địa điểm tìm được
+  /// Returns: List of found locations
   Future<List<Map<String, dynamic>>> searchLocation(
     String query, {
     int limit = 10,
@@ -140,18 +140,18 @@ class MapService {
     }
   }
 
-  /// Calculate Route Distance: Tính khoảng cách route giữa 2 điểm
+  /// Calculate Route Distance: Calculate route distance between 2 points
   ///
-  /// Sử dụng OSRM API (Open Source Routing Machine) để tính
-  /// khoảng cách route thực tế (theo đường đi) giữa 2 điểm.
+  /// Use OSRM API (Open Source Routing Machine) to calculate
+  /// actual route distance (following roads) between 2 points.
   ///
-  /// [startLat] - Vĩ độ điểm bắt đầu
-  /// [startLon] - Kinh độ điểm bắt đầu
-  /// [endLat] - Vĩ độ điểm kết thúc
-  /// [endLon] - Kinh độ điểm kết thúc
-  /// [profile] - Loại route: 'foot-walking', 'driving-car', 'cycling-regular'
+  /// [startLat] - Starting point latitude
+  /// [startLon] - Starting point longitude
+  /// [endLat] - Ending point latitude
+  /// [endLon] - Ending point longitude
+  /// [profile] - Route type: 'foot-walking', 'driving-car', 'cycling-regular'
   ///
-  /// Returns: Map chứa distance (km), duration (phút), và geometry
+  /// Returns: Map containing distance (km), duration (minutes), and geometry
   Future<Map<String, dynamic>?> calculateRoute({
     required double startLat,
     required double startLon,
@@ -160,7 +160,7 @@ class MapService {
     String profile = 'foot-walking',
   }) async {
     try {
-      // Sử dụng OSRM public API
+      // Use OSRM public API
       final url = Uri.parse(
         'https://router.project-osrm.org/route/v1/$profile/$startLon,$startLat;$endLon,$endLat?overview=full&geometries=geojson',
       );
@@ -193,13 +193,13 @@ class MapService {
     }
   }
 
-  /// Get Route Polyline Points: Lấy danh sách điểm cho polyline
+  /// Get Route Polyline Points: Get list of points for polyline
   ///
-  /// Parse geometry từ route response để vẽ polyline trên map
+  /// Parse geometry from route response to draw polyline on map
   ///
-  /// [geometry] - GeoJSON geometry từ OSRM response
+  /// [geometry] - GeoJSON geometry from OSRM response
   ///
-  /// Returns: Danh sách LatLng points
+  /// Returns: List of LatLng points
   List<LatLng> parseRouteGeometry(Map<String, dynamic> geometry) {
     try {
       if (geometry['type'] == 'LineString' && geometry['coordinates'] != null) {
@@ -218,14 +218,14 @@ class MapService {
     }
   }
 
-  /// Batch Reverse Geocoding: Lấy tên cho nhiều tọa độ
+  /// Batch Reverse Geocoding: Get names for multiple coordinates
   ///
-  /// Sử dụng khi cần reverse geocode nhiều điểm cùng lúc.
+  /// Use when need to reverse geocode multiple points at once.
   ///
-  /// [positions] - Danh sách tọa độ cần reverse geocode
-  /// [delay] - Delay giữa các request (milliseconds) để tránh rate limit
+  /// [positions] - List of coordinates to reverse geocode
+  /// [delay] - Delay between requests (milliseconds) to avoid rate limit
   ///
-  /// Returns: Map với key là "lat,lon" và value là display_name
+  /// Returns: Map with key as "lat,lon" and value as display_name
   Future<Map<String, String>> batchReverseGeocode(
     List<LatLng> positions, {
     int delay = 1000,
@@ -251,12 +251,12 @@ class MapService {
 
   /// Validate and Format Location Name
   ///
-  /// Chuẩn hóa tên địa điểm, loại bỏ các ký tự không cần thiết
+  /// Normalize location name, remove unnecessary characters
   ///
-  /// [locationName] - Tên địa điểm cần format
-  /// [maxLength] - Độ dài tối đa (mặc định: 100)
+  /// [locationName] - Location name to format
+  /// [maxLength] - Maximum length (default: 100)
   ///
-  /// Returns: Tên địa điểm đã được format
+  /// Returns: Formatted location name
   String formatLocationName(String locationName, {int maxLength = 100}) {
     String formatted = locationName.trim();
 
@@ -275,15 +275,15 @@ class MapService {
   // GOOGLE MAPS UI HELPERS
   // ============================================================================
 
-  /// Create Marker: Tạo marker cho Google Maps
+  /// Create Marker: Create marker for Google Maps
   ///
-  /// Helper method để tạo marker với các thuộc tính cơ bản
+  /// Helper method to create marker with basic attributes
   ///
-  /// [markerId] - ID duy nhất cho marker
-  /// [position] - Vị trí của marker (LatLng)
-  /// [title] - Tiêu đề hiển thị khi tap vào marker
-  /// [snippet] - Mô tả chi tiết (optional)
-  /// [icon] - Custom icon (optional, mặc định là marker đỏ)
+  /// [markerId] - Unique ID for marker
+  /// [position] - Marker position (LatLng)
+  /// [title] - Title displayed when tapping marker
+  /// [snippet] - Detailed description (optional)
+  /// [icon] - Custom icon (optional, default is red marker)
   /// [infoWindow] - Custom InfoWindow (optional)
   ///
   /// Returns: Marker object
@@ -308,15 +308,15 @@ class MapService {
     );
   }
 
-  /// Create Polyline: Tạo polyline cho Google Maps
+  /// Create Polyline: Create polyline for Google Maps
   ///
-  /// Helper method để tạo polyline (đường nối giữa các điểm)
+  /// Helper method to create polyline (connecting line between points)
   ///
-  /// [polylineId] - ID duy nhất cho polyline
-  /// [points] - Danh sách các điểm tạo thành polyline
-  /// [color] - Màu của polyline (mặc định: xanh dương)
-  /// [width] - Độ rộng của line (mặc định: 5)
-  /// [patterns] - Pattern của line (optional, ví dụ: dotted, dashed)
+  /// [polylineId] - Unique ID for polyline
+  /// [points] - List of points forming the polyline
+  /// [color] - Polyline color (default: blue)
+  /// [width] - Line width (default: 5)
+  /// [patterns] - Line pattern (optional, example: dotted, dashed)
   ///
   /// Returns: Polyline object
   Polyline createPolyline({
@@ -335,16 +335,16 @@ class MapService {
     );
   }
 
-  /// Create Circle: Tạo circle overlay trên map
+  /// Create Circle: Create circle overlay on map
   ///
-  /// Sử dụng để highlight một vùng tròn trên map
+  /// Use to highlight a circular area on map
   ///
-  /// [circleId] - ID duy nhất cho circle
-  /// [center] - Tâm của circle
-  /// [radius] - Bán kính (meters)
-  /// [fillColor] - Màu fill (optional)
-  /// [strokeColor] - Màu viền (optional)
-  /// [strokeWidth] - Độ rộng viền (optional)
+  /// [circleId] - Unique ID for circle
+  /// [center] - Center of circle
+  /// [radius] - Radius (meters)
+  /// [fillColor] - Fill color (optional)
+  /// [strokeColor] - Border color (optional)
+  /// [strokeWidth] - Border width (optional)
   ///
   /// Returns: Circle object
   Circle createCircle({
@@ -365,15 +365,15 @@ class MapService {
     );
   }
 
-  /// Create Polygon: Tạo polygon trên map
+  /// Create Polygon: Create polygon on map
   ///
-  /// Sử dụng để vẽ vùng đa giác trên map
+  /// Use to draw polygon area on map
   ///
-  /// [polygonId] - ID duy nhất cho polygon
-  /// [points] - Danh sách các điểm góc của polygon
-  /// [fillColor] - Màu fill (optional)
-  /// [strokeColor] - Màu viền (optional)
-  /// [strokeWidth] - Độ rộng viền (optional)
+  /// [polygonId] - Unique ID for polygon
+  /// [points] - List of polygon corner points
+  /// [fillColor] - Fill color (optional)
+  /// [strokeColor] - Border color (optional)
+  /// [strokeWidth] - Border width (optional)
   ///
   /// Returns: Polygon object
   Polygon createPolygon({
@@ -392,11 +392,11 @@ class MapService {
     );
   }
 
-  /// Get Bounds: Tính toán bounds cho nhiều điểm
+  /// Get Bounds: Calculate bounds for multiple points
   ///
-  /// Sử dụng để fit camera vào tất cả các markers
+  /// Use to fit camera to all markers
   ///
-  /// [points] - Danh sách các điểm cần include
+  /// [points] - List of points to include
   ///
   /// Returns: LatLngBounds
   LatLngBounds? getBounds(List<LatLng> points) {
@@ -425,10 +425,10 @@ class MapService {
     );
   }
 
-  /// Fit Bounds: Adjust camera để hiển thị tất cả markers
+  /// Fit Bounds: Adjust camera to display all markers
   ///
-  /// [bounds] - LatLngBounds cần fit
-  /// [padding] - Padding xung quanh (pixels)
+  /// [bounds] - LatLngBounds to fit
+  /// [padding] - Padding around (pixels)
   Future<void> fitBounds(LatLngBounds bounds, {double padding = 50}) async {
     if (_mapController != null) {
       await _mapController!.animateCamera(

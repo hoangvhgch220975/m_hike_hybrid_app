@@ -3,13 +3,13 @@
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-/// Service xử lý tất cả thao tác liên quan đến Media (Images, Videos)
+/// Service for handling all operations related to media (images, videos)
 class MediaService {
   final ImagePicker _picker = ImagePicker();
 
   // ============= IMAGE OPERATIONS =============
 
-  /// Chụp ảnh bằng Camera (Feature 8)
+  /// Capture an image with the camera (Feature 8)
   Future<String?> pickImageFromCamera() async {
     try {
       final XFile? xFile = await _picker.pickImage(
@@ -25,7 +25,7 @@ class MediaService {
     }
   }
 
-  /// Chọn 1 ảnh từ Gallery
+  /// Pick a single image from the gallery
   Future<String?> pickImageFromGallery() async {
     try {
       final XFile? xFile = await _picker.pickImage(
@@ -41,7 +41,7 @@ class MediaService {
     }
   }
 
-  /// Chọn nhiều ảnh từ Gallery (Feature 9: Multi Images)
+  /// Pick multiple images from the gallery (Feature 9: Multi Images)
   Future<List<String>> pickMultiImage({int? maxImages}) async {
     try {
       final List<XFile> xFiles = await _picker.pickMultiImage(
@@ -50,7 +50,7 @@ class MediaService {
         imageQuality: 85,
       );
 
-      // Giới hạn số lượng ảnh nếu cần
+      // Limit number of images if needed
       List<XFile> selectedFiles = maxImages != null && xFiles.length > maxImages
           ? xFiles.sublist(0, maxImages)
           : xFiles;
@@ -64,12 +64,12 @@ class MediaService {
 
   // ============= VIDEO OPERATIONS =============
 
-  /// Chọn Video từ Gallery
+  /// Pick a video from the gallery
   Future<String?> pickVideoFromGallery() async {
     try {
       final XFile? xFile = await _picker.pickVideo(
         source: ImageSource.gallery,
-        maxDuration: const Duration(minutes: 5), // Giới hạn 5 phút
+        maxDuration: const Duration(minutes: 5), // Limit 5 minutes
       );
       return xFile?.path;
     } catch (e) {
@@ -78,8 +78,8 @@ class MediaService {
     }
   }
 
-  /// Quay Video bằng Camera
-  Future<String?> recordVideoFromCamera() async {
+  /// Record a video using the camera
+  Future<String?> recordVideoFromCamera() async{
     try {
       final XFile? xFile = await _picker.pickVideo(
         source: ImageSource.camera,
@@ -92,12 +92,12 @@ class MediaService {
     }
   }
 
-  /// Chọn nhiều Video từ Gallery
+  /// Pick multiple videos from the gallery
   Future<List<String>> pickMultiVideo({int? maxVideos}) async {
     try {
-      // Note: pickMultiVideo không có sẵn trong ImagePicker
-      // Phải gọi pickVideo nhiều lần hoặc dùng file_picker package
-      // Đây là workaround đơn giản
+      // Note: pickMultiVideo is not available in ImagePicker
+      // Need to call pickVideo multiple times or use the file_picker package
+      // This is a simple workaround
       List<String> videoPaths = [];
 
       int limit = maxVideos ?? 5;
@@ -106,7 +106,7 @@ class MediaService {
         if (path != null) {
           videoPaths.add(path);
         } else {
-          break; // User hủy việc chọn
+          break; // User canceled selection
         }
       }
 
@@ -119,12 +119,12 @@ class MediaService {
 
   // ============= FILE VALIDATION =============
 
-  /// Kiểm tra file có tồn tại không
+  /// Check whether the file exists
   bool isFileExists(String path) {
     return File(path).existsSync();
   }
 
-  /// Lấy kích thước file (bytes)
+  /// Get file size (bytes)
   int getFileSize(String path) {
     try {
       return File(path).lengthSync();
@@ -134,13 +134,13 @@ class MediaService {
     }
   }
 
-  /// Lấy kích thước file (MB)
+  /// Get file size (MB)
   double getFileSizeMB(String path) {
     int bytes = getFileSize(path);
     return bytes / (1024 * 1024);
   }
 
-  /// Validate ảnh (kiểm tra kích thước và định dạng)
+  /// Validate image (size and extension)
   bool validateImage(String path, {double maxSizeMB = 10}) {
     if (!isFileExists(path)) return false;
 
@@ -151,7 +151,7 @@ class MediaService {
     return ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
   }
 
-  /// Validate video (kiểm tra kích thước và định dạng)
+  /// Validate video (size and extension)
   bool validateVideo(String path, {double maxSizeMB = 50}) {
     if (!isFileExists(path)) return false;
 
@@ -164,7 +164,7 @@ class MediaService {
 
   // ============= FILE OPERATIONS =============
 
-  /// Xóa file
+  /// Delete a file
   Future<bool> deleteFile(String path) async {
     try {
       File file = File(path);
@@ -179,14 +179,14 @@ class MediaService {
     }
   }
 
-  /// Xóa nhiều file
+  /// Delete multiple files
   Future<void> deleteMultipleFiles(List<String> paths) async {
     for (String path in paths) {
       await deleteFile(path);
     }
   }
 
-  /// Xác định loại media từ extension
+  /// Determine media type from extension
   String getMediaType(String path) {
     String ext = path.split('.').last.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext)) {
@@ -197,21 +197,21 @@ class MediaService {
     return 'unknown';
   }
 
-  /// Kiểm tra path có phải là image không
+  /// Check if the path points to an image
   bool isImage(String path) {
     return getMediaType(path) == 'image';
   }
 
-  /// Kiểm tra path có phải là video không
+  /// Check if the path points to a video
   bool isVideo(String path) {
     return getMediaType(path) == 'video';
   }
 
   // ============= COMPRESSION (Optional - requires packages) =============
 
-  /// Note: Để nén ảnh/video cần thêm packages:
+  /// Note: To compress images/videos, add packages:
   /// - flutter_image_compress
   /// - video_compress
-  /// Có thể implement sau nếu cần
+  /// Can be implemented later if needed
 }
 

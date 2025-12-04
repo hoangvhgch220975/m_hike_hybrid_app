@@ -1,17 +1,18 @@
 // lib/services/web_map_service.dart
 
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Service xử lý integration với Web-based map (Leaflet map từ GitHub Pages)
+/// Service for handling integration with Web-based map (Leaflet map from GitHub Pages)
 ///
-/// Service này chịu trách nhiệm parse và validate data từ
-/// JavaScript channel của WebView map.
+/// This service is responsible for parsing and validating data from
+/// the JavaScript channel of the WebView map.
 class WebMapService {
-  /// Parse location data từ JavaScript message
+  /// Parse location data from JavaScript message
   ///
-  /// [message] - Raw JSON string từ MapPickerChannel
+  /// [message] - Raw JSON string from MapPickerChannel
   ///
-  /// Returns: Map chứa location data hoặc null nếu parse thất bại
+  /// Returns: Map containing location data or null if parsing fails
   ///
   /// Expected format:
   /// ```json
@@ -65,7 +66,7 @@ class WebMapService {
     }
   }
 
-  /// Parse coordinate value (lat hoặc lon)
+  /// Parse coordinate value (lat or lon)
   double? _parseCoordinate(dynamic value, String type) {
     try {
       double coord;
@@ -101,7 +102,7 @@ class WebMapService {
 
   /// Validate location data completeness
   ///
-  /// Kiểm tra xem location data có đủ các field cần thiết không
+  /// Check whether location data contains all required fields
   bool validateLocationData(Map<String, dynamic> data) {
     if (!data.containsKey('latitude') || data['latitude'] == null) {
       return false;
@@ -117,16 +118,16 @@ class WebMapService {
 
   /// Format distance value
   ///
-  /// Làm tròn distance về 2 chữ số thập phân
+  /// Round distance to 2 decimal places
   String formatDistance(double? distance) {
     if (distance == null) return '0.00';
     return distance.toStringAsFixed(2);
   }
 
-  /// Create JavaScript payload để gửi về map
+  /// Create JavaScript payload to send to map
   ///
-  /// Sử dụng khi cần gửi data từ Flutter về JavaScript map
-  /// (ví dụ: set initial location)
+  /// Use when need to send data from Flutter to JavaScript map
+  /// (example: set initial location)
   String createMapPayload({
     required double lat,
     required double lon,
@@ -161,7 +162,7 @@ class WebMapService {
 
   /// Get default map URL (fallback)
   String getDefaultMapUrl() {
-    return 'https://hoangvhgch220975.github.io/map_only/';
+    return dotenv.env['WEB_MAP_URL'] ?? 'https://hoangvhgch220975.github.io/map_only/';
   }
 }
 

@@ -896,7 +896,6 @@ class _HikeDetailViewState extends State<HikeDetailView> {
 
     try {
       // Check if hike is completed - only load from database
-      // Kiểm tra nếu hike đã hoàn thành - chỉ đọc dữ liệu từ database
       if (_hike!.isComplete) {
         debugPrint('Hike is completed. Loading weather from database only.');
         await weatherVM.loadStoredForecasts(_hike!.id!);
@@ -909,7 +908,6 @@ class _HikeDetailViewState extends State<HikeDetailView> {
       }
 
       // For planned hikes, fetch new forecast
-      // Đối với hike đang lên kế hoạch, lấy dự báo mới
       final location = _hike!.location.trim();
 
       if (location.isEmpty) {
@@ -919,7 +917,6 @@ class _HikeDetailViewState extends State<HikeDetailView> {
       }
 
       // Parse hike date
-      // Phân tích ngày bắt đầu của hike
       DateTime startDate;
       try {
         startDate = _parseHikeDate(_hike!.date);
@@ -930,7 +927,6 @@ class _HikeDetailViewState extends State<HikeDetailView> {
       }
 
       // Check if hike date is in the past
-      // Kiểm tra nếu ngày hike đã qua (không hợp lệ cho plan)
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final hikeDate = DateTime(startDate.year, startDate.month, startDate.day);
@@ -945,7 +941,6 @@ class _HikeDetailViewState extends State<HikeDetailView> {
       }
 
       // Check if hike date is too far in the future (API limitation: 5 days)
-      // Kiểm tra nếu ngày hike quá xa (giới hạn API: 5 ngày)
       final maxForecastDate = today.add(const Duration(days: 5));
       if (hikeDate.isAfter(maxForecastDate)) {
         weatherVM.errorMessage =
@@ -956,12 +951,7 @@ class _HikeDetailViewState extends State<HikeDetailView> {
         return;
       }
 
-      // Fetch weather forecast starting from hike date
-      // If location was picked from map (has lat/lon), use coordinates
-      // Otherwise, use location name
-      // Lấy dự báo thời tiết bắt đầu từ ngày hike
-      // Nếu địa điểm được chọn từ map (có lat/lon), dùng tọa độ
-      // Ngược lại, dùng tên địa điểm
+
       if (_hike!.isMapPicked && _hike!.latitude != null && _hike!.longitude != null) {
         // Use coordinates from map picker
         await weatherVM.fetchAndSaveWeatherForHikeByCoordinates(

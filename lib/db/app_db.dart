@@ -8,45 +8,45 @@ import '../models/media_item.dart';
 import '../models/ai_suggestion.dart';
 
 // ============================================================================
-// LỚP QUẢN LÝ DATABASE (SINGLETON)
-// Chịu trách nhiệm khởi tạo DB và cung cấp các hàm CRUD cơ bản.
+// DATABASE MANAGER CLASS (SINGLETON)
+// Responsible for initializing the DB and providing basic CRUD functions.
 // ============================================================================
 class AppDatabase {
-  // Sử dụng Singleton Pattern: Chỉ có duy nhất một instance của AppDatabase
+  // Using Singleton Pattern: Only one instance of AppDatabase exists
   static final AppDatabase instance = AppDatabase._privateConstructor();
   static Database? _database;
 
   AppDatabase._privateConstructor();
 
-  // Tên Database và Version
+  // Database Name and Version
   final String _dbName = 'm_hike_hybrid_app.db';
   // Version 1: All tables including AI suggestions from the start
   final int _dbVersion = 1;
 
-  // Tên Bảng
+  // Table Names
   final String _hikeTable = 'hikes';
   final String _observationTable = 'observations';
   final String _mediaTable = 'media';
   final String _weatherTable = 'weather_forecasts';
   final String _aiSuggestionTable = 'ai_suggestions';
 
-  // Getter cho Database instance
-  // Nếu database đã tồn tại (_database != null) thì trả về, ngược lại khởi tạo
+  // Getter for Database instance
+  // If database already exists (_database != null) return it, otherwise initialize
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
-  // Khởi tạo Database: Mở hoặc tạo database tại đường dẫn xác định
+  // Initialize Database: Open or create database at specified path
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), _dbName);
     return await openDatabase(
       path,
       version: _dbVersion,
-      onCreate: _onCreate, // Hàm tạo bảng
-      onConfigure: _onConfigure, // Hàm bật Foreign Key
-      onUpgrade: _onUpgrade, // Hàm xử lý nâng cấp schema (no-op for completed migration)
+      onCreate: _onCreate, // Function to create tables
+      onConfigure: _onConfigure, // Function to enable Foreign Keys
+      onUpgrade: _onUpgrade, // Function to handle schema upgrades (no-op for completed migration)
       onOpen: _onOpen,
     );
   }
@@ -57,22 +57,22 @@ class AppDatabase {
     // intentionally left blank
   }
 
-  // Bật chế độ Foreign Keys
-  // Đảm bảo tính toàn vẹn dữ liệu khi xóa (ON DELETE CASCADE)
+  // Enable Foreign Keys mode
+  // Ensures data integrity when deleting (ON DELETE CASCADE)
   Future _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
   }
 
-  // Xử lý nâng cấp database
+  // Handle database upgrades
   // Starting fresh at version 1 with all tables from the start
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // No migrations needed - version 1 includes all tables
     // If you need to upgrade in the future, add migration logic here
   }
 
-  // Tạo các bảng khi database được tạo lần đầu
+  // Create tables when database is created for the first time
   Future _onCreate(Database db, int version) async {
-    // 1. Bảng HIKES
+    // 1. HIKES Table
     await db.execute('''
       CREATE TABLE $_hikeTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,7 +93,7 @@ class AppDatabase {
       )
     ''');
 
-    // 2. Bảng OBSERVATIONS (Liên kết với HIKES)
+    // 2. OBSERVATIONS Table (Linked to HIKES)
     await db.execute('''
       CREATE TABLE $_observationTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,7 +105,7 @@ class AppDatabase {
       )
     ''');
 
-    // 3. Bảng MEDIA (Liên kết với OBSERVATIONS)
+    // 3. MEDIA Table (Linked to OBSERVATIONS)
     await db.execute('''
       CREATE TABLE $_mediaTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,7 +116,7 @@ class AppDatabase {
       )
     ''');
 
-    // 4. Bảng WEATHER_FORECASTS (Liên kết với HIKES)
+    // 4. WEATHER_FORECASTS Table (Linked to HIKES)
     await db.execute('''
       CREATE TABLE $_weatherTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,7 +133,7 @@ class AppDatabase {
       )
     ''');
 
-    // 5. Bảng AI_SUGGESTIONS (Liên kết với HIKES)
+    // 5. AI_SUGGESTIONS Table (Linked to HIKES)
     await db.execute('''
       CREATE TABLE $_aiSuggestionTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -155,13 +155,13 @@ class AppDatabase {
   // MARK: - CRUD Hikes (Feature 1, 4)
   // ============================================================================
 
-   /// Thêm một chuyến đi mới vào bảng hikes.
+   /// Add a new hike to the hikes table.
    Future<int> insertHike(Hike hike) async {
      Database db = await instance.database;
      return await db.insert(_hikeTable, hike.toMap());
    }
 
-   /// Lấy một Hike theo ID.
+   /// Get a Hike by ID.
    Future<Hike?> getHikeById(int id) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -175,7 +175,7 @@ class AppDatabase {
      return null;
    }
 
-   /// Cập nhật thông tin của một Hike dựa trên ID.
+   /// Update a Hike's information based on ID.
    Future<int> updateHike(Hike hike) async {
      Database db = await instance.database;
      return await db.update(
@@ -186,8 +186,8 @@ class AppDatabase {
      );
    }
 
-   /// Xóa một Hike theo ID.
-   /// Nhờ ON DELETE CASCADE, các Observations và Media liên quan sẽ tự động bị xóa.
+   /// Delete a Hike by ID.
+   /// Thanks to ON DELETE CASCADE, related Observations and Media will be automatically deleted.
    Future<int> deleteHike(int id) async {
      Database db = await instance.database;
      return await db.delete(
@@ -197,7 +197,7 @@ class AppDatabase {
      );
    }
 
-   // Lấy tất cả Hikes (không phân trang).
+   // Get all Hikes (no pagination).
    Future<List<Hike>> getAllHikes() async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -210,7 +210,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách Hike theo trang với kích thước tùy chỉnh (cho Infinity Scroll).
+   /// Get paginated Hikes with custom page size (for Infinity Scroll).
    Future<List<Hike>> getHikesPaged(int page, int pageSize) async {
      Database db = await instance.database;
      final offset = page * pageSize;
@@ -227,14 +227,14 @@ class AppDatabase {
      });
    }
 
-   /// Đếm số lượng Hikes.
+   /// Count number of Hikes.
    Future<int> getHikesCount() async {
      Database db = await instance.database;
      final result = await db.rawQuery('SELECT COUNT(*) as count FROM $_hikeTable');
      return Sqflite.firstIntValue(result) ?? 0;
    }
 
-   /// Tìm kiếm Hikes theo tên hoặc địa điểm.
+   /// Search Hikes by name or location.
    Future<List<Hike>> searchHikes(String query) async {
      if (query.isEmpty) return [];
 
@@ -251,7 +251,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách Hikes đã hoàn thành (Feed).
+   /// Get list of completed Hikes (Feed).
    Future<List<Hike>> getCompletedHikes({int? limit}) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -267,7 +267,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách Hikes chưa hoàn thành (Plan).
+   /// Get list of planned Hikes (Plan).
    Future<List<Hike>> getPlannedHikes({int? limit}) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -283,7 +283,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách Hikes đáng nhớ (Remarkable).
+   /// Get list of remarkable Hikes (Remarkable).
    Future<List<Hike>> getRemarkableHikes({int? limit}) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -299,7 +299,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách Hikes gần đây (Recent).
+   /// Get list of recent Hikes.
    Future<List<Hike>> getRecentHikes({int limit = 10}) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -313,7 +313,7 @@ class AppDatabase {
      });
    }
 
-   /// Lọc Hikes theo độ khó.
+   /// Filter Hikes by difficulty.
    Future<List<Hike>> getHikesByDifficulty(String difficulty) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -328,7 +328,7 @@ class AppDatabase {
      });
    }
 
-   /// Lọc Hikes theo nhiều tiêu chí (advanced filter).
+   /// Filter Hikes by multiple criteria (advanced filter).
    Future<List<Hike>> filterHikes({
      String? difficulty,
      bool? isComplete,
@@ -386,13 +386,13 @@ class AppDatabase {
    // MARK: - CRUD Observations (Feature 2)
    // ============================================================================
 
-   /// Thêm một Observation mới vào bảng observations.
+   /// Add a new Observation to the observations table.
    Future<int> insertObservation(Observation observation) async {
      Database db = await instance.database;
      return await db.insert(_observationTable, observation.toMap());
    }
 
-   /// Cập nhật Observation dựa trên ID.
+   /// Update Observation based on ID.
    Future<int> updateObservation(Observation observation) async {
      Database db = await instance.database;
      return await db.update(
@@ -403,8 +403,8 @@ class AppDatabase {
      );
    }
 
-   /// Xóa Observation theo ID.
-   /// Nhờ ON DELETE CASCADE, các Media liên quan sẽ tự động bị xóa.
+   /// Delete Observation by ID.
+   /// Thanks to ON DELETE CASCADE, related Media will be automatically deleted.
    Future<int> deleteObservation(int id) async {
      Database db = await instance.database;
      return await db.delete(
@@ -414,7 +414,7 @@ class AppDatabase {
      );
    }
 
-   /// Lấy Observation theo ID (kèm media).
+   /// Get Observation by ID (with media).
    Future<Observation?> getObservationById(int id) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -434,7 +434,7 @@ class AppDatabase {
      return null;
    }
 
-   /// Lấy tất cả Observations theo hikeId (không phân trang, kèm media).
+   /// Get all Observations by hikeId (no pagination, with media).
    Future<List<Observation>> getObservationsByHike(int hikeId) async {
      Database db = await instance.database;
 
@@ -459,7 +459,7 @@ class AppDatabase {
      return observations;
    }
 
-   /// Lấy danh sách Observation theo hikeId với phân trang (cho Infinity Scroll).
+   /// Get paginated Observations by hikeId (for Infinity Scroll).
    Future<List<Observation>> getObservationsByHikePaged(
      int hikeId,
      int page,
@@ -491,7 +491,7 @@ class AppDatabase {
      return observations;
    }
 
-   /// Đếm số lượng Observations theo hikeId.
+   /// Count number of Observations by hikeId.
    Future<int> getObservationsCount(int hikeId) async {
      Database db = await instance.database;
      final result = await db.rawQuery(
@@ -505,8 +505,8 @@ class AppDatabase {
    // MARK: - CRUD Media Items (Feature 2)
    // ============================================================================
 
-   /// Thêm danh sách MediaItem (ảnh/video) vào bảng media.
-   /// Sử dụng transaction để đảm bảo tất cả được lưu thành công.
+   /// Add list of MediaItem (images/videos) to media table.
+   /// Use transaction to ensure all items are saved successfully.
    Future<void> insertMediaItems(List<MediaItem> mediaList) async {
      Database db = await instance.database;
      await db.transaction((txn) async {
@@ -516,7 +516,7 @@ class AppDatabase {
      });
    }
 
-   /// Lấy danh sách MediaItem thuộc về một Observation cụ thể.
+   /// Get list of MediaItem belonging to a specific Observation.
    Future<List<MediaItem>> getMediaForObservation(int observationId) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -531,7 +531,7 @@ class AppDatabase {
      });
    }
 
-  /// Lấy một MediaItem cụ thể theo observationId và media id.
+  /// Get a specific MediaItem by observationId and media id.
   Future<MediaItem?> getMediaItemByObservationAndId(int observationId, int mediaId) async {
     Database db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -545,13 +545,13 @@ class AppDatabase {
     return null;
   }
 
-   /// Thêm một MediaItem.
+   /// Add a single MediaItem.
    Future<int> insertMediaItem(MediaItem mediaItem) async {
      Database db = await instance.database;
      return await db.insert(_mediaTable, mediaItem.toMap());
    }
 
-   /// Cập nhật MediaItem.
+   /// Update MediaItem.
    Future<int> updateMediaItem(MediaItem mediaItem) async {
      Database db = await instance.database;
      return await db.update(
@@ -562,7 +562,7 @@ class AppDatabase {
      );
    }
 
-   /// Xóa MediaItem theo ID.
+   /// Delete MediaItem by ID.
    Future<int> deleteMediaItem(int id) async {
      Database db = await instance.database;
      return await db.delete(
@@ -573,16 +573,16 @@ class AppDatabase {
    }
 
    // ============================================================================
-   // MARK: - CUSTOM DATA RETRIEVAL (Dùng cho Hike Detail và Logic ảnh đại diện)
+   // MARK: - CUSTOM DATA RETRIEVAL (For Hike Detail and banner image logic)
    // ============================================================================
 
-   /// Lấy chi tiết Hike bao gồm tất cả Observations và MediaItems liên quan.
-   /// Phục vụ cho màn hình Hike Detail và logic xác định ảnh đại diện/carousel
-   /// theo yêu cầu tùy chỉnh.
+   /// Get Hike details including all related Observations and MediaItems.
+   /// Used for Hike Detail screen and logic to determine banner image/carousel
+   /// according to custom requirements.
    Future<Hike?> getHikeDetailData(int hikeId) async {
      Database db = await instance.database;
 
-     // 1. Lấy Hike cơ bản
+     // 1. Get basic Hike
      final List<Map<String, dynamic>> hikeMaps = await db.query(
        _hikeTable,
        where: 'id = ?',
@@ -592,7 +592,7 @@ class AppDatabase {
 
      Hike hike = Hike.fromMap(hikeMaps.first);
 
-     // 2. Lấy Observations liên quan
+     // 2. Get related Observations
      final List<Map<String, dynamic>> obsMaps = await db.query(
        _observationTable,
        where: 'hikeId = ?',
@@ -604,11 +604,11 @@ class AppDatabase {
        return Observation.fromMap(obsMaps[i]);
      });
 
-     // 3. Lấy Media liên quan đến TẤT CẢ Observations
+     // 3. Get Media related to ALL Observations
      if (observations.isNotEmpty) {
        final obsIds = observations.map((o) => o.id).whereType<int>().toList();
 
-       // Query tất cả MediaItem có observationId nằm trong danh sách obsIds
+       // Query all MediaItem with observationId in obsIds list
        final List<Map<String, dynamic>> mediaMaps = await db.query(
          _mediaTable,
          where: 'observationId IN (${List.filled(obsIds.length, '?').join(', ')})',
@@ -616,7 +616,7 @@ class AppDatabase {
          orderBy: 'id ASC',
        );
 
-       // Map MediaItem vào Observation tương ứng
+       // Map MediaItem to corresponding Observation
        final mediaMap = <int, List<MediaItem>>{};
        for (final map in mediaMaps) {
          final mediaItem = MediaItem.fromMap(map);
@@ -624,13 +624,13 @@ class AppDatabase {
          mediaMap.putIfAbsent(obsId, () => []).add(mediaItem);
        }
 
-       // Gán danh sách MediaItems đã lấy được vào từng Observation
+       // Assign retrieved MediaItems list to each Observation
        for (var obs in observations) {
          obs.media = mediaMap[obs.id] ?? [];
        }
      }
 
-     // Gán danh sách Observation đã được populate MediaItems vào Hike
+     // Assign Observation list populated with MediaItems to Hike
      hike.observations = observations;
 
      return hike;
@@ -640,13 +640,13 @@ class AppDatabase {
    // MARK: - CRUD Weather Forecasts (Feature 9)
    // ============================================================================
 
-   /// Thêm một dự báo thời tiết vào bảng weather_forecasts
+   /// Add a weather forecast to the weather_forecasts table
    Future<int> insertWeatherForecast(Map<String, dynamic> weatherData) async {
      Database db = await instance.database;
      return await db.insert(_weatherTable, weatherData);
    }
 
-   /// Thêm nhiều dự báo thời tiết cùng lúc (cho forecast nhiều ngày)
+   /// Add multiple weather forecasts at once (for multi-day forecast)
    Future<void> insertWeatherForecasts(List<Map<String, dynamic>> forecasts) async {
      Database db = await instance.database;
      await db.transaction((txn) async {
@@ -657,7 +657,6 @@ class AppDatabase {
    }
 
    /// Get all weather forecasts for a hike
-   /// Lấy tất cả dự báo thời tiết cho một hike
    Future<List<Map<String, dynamic>>> getWeatherForecastsByHike(int hikeId) async {
      if (hikeId <= 0) {
        return [];
@@ -677,7 +676,7 @@ class AppDatabase {
      }
    }
 
-   /// Lấy dự báo thời tiết cho một ngày cụ thể của hike
+   /// Get weather forecast for a specific date of a hike
    Future<Map<String, dynamic>?> getWeatherForecastByDate(int hikeId, String date) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -693,7 +692,7 @@ class AppDatabase {
      return null;
    }
 
-   /// Xóa tất cả dự báo thời tiết của một hike
+   /// Delete all weather forecasts for a hike
    Future<int> deleteWeatherForecastsByHike(int hikeId) async {
      Database db = await instance.database;
      return await db.delete(
@@ -703,7 +702,7 @@ class AppDatabase {
      );
    }
 
-   /// Xóa dự báo thời tiết cũ (quá 7 ngày)
+   /// Delete weather forecasts older than 7 days
    Future<int> deleteOldWeatherForecasts() async {
      Database db = await instance.database;
      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
@@ -714,18 +713,18 @@ class AppDatabase {
      );
    }
 
-   /// Cập nhật dự báo thời tiết cho một hike (xóa cũ và thêm mới)
+   /// Update weather forecasts for a hike (delete old and insert new entries)
    Future<void> updateWeatherForecastsForHike(int hikeId, List<Map<String, dynamic>> forecasts) async {
      Database db = await instance.database;
      await db.transaction((txn) async {
-       // Xóa dự báo cũ
+       // Remove existing forecasts
        await txn.delete(
          _weatherTable,
          where: 'hikeId = ?',
          whereArgs: [hikeId],
        );
 
-       // Thêm dự báo mới
+       // Insert new forecasts
        for (final forecast in forecasts) {
          await txn.insert(_weatherTable, forecast);
        }
@@ -736,13 +735,13 @@ class AppDatabase {
    // MARK: - CRUD AI Suggestions
    // ============================================================================
 
-   /// Thêm một AI suggestion mới vào bảng ai_suggestions
+   /// Insert a new AI suggestion into the ai_suggestions table
    Future<int> insertAISuggestion(AISuggestion suggestion) async {
      Database db = await instance.database;
      return await db.insert(_aiSuggestionTable, suggestion.toMap());
    }
 
-   /// Lấy AI suggestion theo hikeId
+   /// Get AI suggestion by hikeId
    /// Returns null if no suggestion exists for this hike
    Future<AISuggestion?> getAISuggestionByHikeId(int hikeId) async {
      Database db = await instance.database;
@@ -759,7 +758,7 @@ class AppDatabase {
      return null;
    }
 
-   /// Cập nhật AI suggestion
+   /// Update an AI suggestion
    Future<int> updateAISuggestion(AISuggestion suggestion) async {
      Database db = await instance.database;
      return await db.update(
@@ -770,7 +769,7 @@ class AppDatabase {
      );
    }
 
-   /// Xóa AI suggestion theo hikeId
+   /// Delete AI suggestion by hikeId
    Future<int> deleteAISuggestionByHikeId(int hikeId) async {
      Database db = await instance.database;
      return await db.delete(
@@ -780,7 +779,7 @@ class AppDatabase {
      );
    }
 
-   /// Xóa AI suggestion theo ID
+   /// Delete AI suggestion by ID
    Future<int> deleteAISuggestion(int id) async {
      Database db = await instance.database;
      return await db.delete(
@@ -790,7 +789,7 @@ class AppDatabase {
      );
    }
 
-   /// Kiểm tra xem hike có AI suggestion chưa
+   /// Check whether a hike already has an AI suggestion
    Future<bool> hasAISuggestion(int hikeId) async {
      Database db = await instance.database;
      final List<Map<String, dynamic>> maps = await db.query(
@@ -807,7 +806,7 @@ class AppDatabase {
    // ============================================================================
 
 
-   /// Xóa tất cả dữ liệu (dùng cho testing hoặc reset app)
+   /// Clear all data (for testing or app reset)
    Future<void> clearAllData() async {
      Database db = await instance.database;
      await db.delete(_weatherTable);
@@ -816,12 +815,12 @@ class AppDatabase {
      await db.delete(_hikeTable);
    }
 
-   /// Đóng database
+   /// Close database connection
    Future<void> close() async {
      Database db = await instance.database;
      await db.close();
    }
 }
 
-// Tạo alias để dễ sử dụng
+// Create an alias for convenience
 typedef DbHelper = AppDatabase;

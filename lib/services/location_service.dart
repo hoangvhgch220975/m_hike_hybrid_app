@@ -4,10 +4,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-/// Service xử lý mọi thao tác liên quan đến Location và Geocoding
+/// Service handling all operations related to Location and Geocoding
 class LocationService {
 
-  /// Kiểm tra quyền truy cập vị trí
+  /// Check location permission
   Future<bool> checkLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -29,7 +29,7 @@ class LocationService {
     return true;
   }
 
-  /// Lấy vị trí hiện tại của thiết bị
+  /// Get the device's current location
   Future<Position?> getCurrentLocation() async {
     try {
       bool hasPermission = await checkLocationPermission();
@@ -49,7 +49,7 @@ class LocationService {
     }
   }
 
-  /// Chuyển đổi LatLng sang Địa chỉ (Reverse Geocoding)
+  /// Convert LatLng to Address (Reverse Geocoding)
   Future<String> getAddressFromLatLng(double latitude, double longitude) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
@@ -82,7 +82,7 @@ class LocationService {
     }
   }
 
-  /// Chuyển đổi Địa chỉ sang LatLng (Forward Geocoding)
+  /// Convert Address to LatLng (Forward Geocoding)
   Future<LatLng?> getLatLngFromAddress(String address) async {
     try {
       List<Location> locations = await locationFromAddress(address);
@@ -97,13 +97,13 @@ class LocationService {
     }
   }
 
-  /// Tính khoảng cách giữa 2 điểm (đơn vị: km)
+  /// Calculate the distance between two points (unit: km)
   double calculateDistance(
-    double startLat,
-    double startLng,
-    double endLat,
-    double endLng
-  ) {
+      double startLat,
+      double startLng,
+      double endLat,
+      double endLng
+      ) {
     double distanceInMeters = Geolocator.distanceBetween(
       startLat,
       startLng,
@@ -113,7 +113,7 @@ class LocationService {
     return distanceInMeters / 1000; // Convert to kilometers
   }
 
-  /// Tính khoảng cách giữa 2 LatLng
+  /// Calculate distance between two LatLng points
   double calculateDistanceLatLng(LatLng start, LatLng end) {
     return calculateDistance(
       start.latitude,
@@ -123,7 +123,7 @@ class LocationService {
     );
   }
 
-  /// Lấy vị trí hiện tại dưới dạng LatLng
+  /// Get current location as LatLng
   Future<LatLng?> getCurrentLatLng() async {
     Position? position = await getCurrentLocation();
     if (position != null) {
@@ -132,7 +132,7 @@ class LocationService {
     return null;
   }
 
-  /// Stream theo dõi vị trí liên tục (cho navigation mode)
+  /// Stream to continuously track location (for navigation mode)
   Stream<Position> getPositionStream() {
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
@@ -142,9 +142,8 @@ class LocationService {
     return Geolocator.getPositionStream(locationSettings: locationSettings);
   }
 
-  /// Validate coordinates hợp lệ
+  /// Validate if coordinates are valid
   bool isValidCoordinate(double lat, double lng) {
     return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
   }
 }
-

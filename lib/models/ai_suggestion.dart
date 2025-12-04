@@ -2,16 +2,16 @@
 
 /// Model for AI-generated trip suggestions
 class AISuggestion {
-  int? id; // ID trong database (null khi chưa lưu)
-  int hikeId; // Foreign key đến bảng hikes
-  String summary; // Tóm tắt chuyến đi
-  String difficultyAdvice; // Lời khuyên về độ khó
-  String weatherAdvice; // Lời khuyên về thời tiết
-  List<String> packingList; // Danh sách đồ cần mang
-  List<String> risks; // Danh sách rủi ro
-  String? startTimeHint; // Gợi ý giờ khởi hành
-  DateTime generatedAt; // Thời gian tạo
-  String modelVersion; // Phiên bản AI model
+  int? id; // ID in database (null when not yet saved)
+  int hikeId; // Foreign key referencing hikes table
+  String summary; // Trip summary
+  String difficultyAdvice; // Advice about trail difficulty
+  String weatherAdvice; // Advice about weather conditions
+  List<String> packingList; // List of items to bring
+  List<String> risks; // List of potential risks
+  String? startTimeHint; // Suggested starting time
+  DateTime generatedAt; // Generation timestamp
+  String modelVersion; // AI model version
 
   AISuggestion({
     this.id,
@@ -26,7 +26,7 @@ class AISuggestion {
     required this.modelVersion,
   });
 
-  /// Tạo AISuggestion từ JSON API response
+  /// Create AISuggestion from JSON API response
   factory AISuggestion.fromJson(Map<String, dynamic> json, int hikeId) {
     return AISuggestion(
       hikeId: hikeId,
@@ -43,7 +43,7 @@ class AISuggestion {
     );
   }
 
-  /// Chuyển đối tượng AISuggestion thành Map để lưu vào SQLite
+  /// Convert AISuggestion object to Map for SQLite storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -51,7 +51,7 @@ class AISuggestion {
       'summary': summary,
       'difficultyAdvice': difficultyAdvice,
       'weatherAdvice': weatherAdvice,
-      'packingList': packingList.join('||'), // Sử dụng || làm separator
+      'packingList': packingList.join('||'), // Use || as separator
       'risks': risks.join('||'),
       'startTimeHint': startTimeHint,
       'generatedAt': generatedAt.toIso8601String(),
@@ -59,7 +59,7 @@ class AISuggestion {
     };
   }
 
-  /// Tạo đối tượng AISuggestion từ Map đọc từ SQLite
+  /// Create AISuggestion from Map read from SQLite
   factory AISuggestion.fromMap(Map<String, dynamic> map) {
     return AISuggestion(
       id: map['id'] as int?,
@@ -102,4 +102,3 @@ class AISuggestion {
     );
   }
 }
-

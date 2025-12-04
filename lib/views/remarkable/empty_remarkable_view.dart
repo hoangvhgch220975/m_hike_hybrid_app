@@ -118,7 +118,6 @@ class _EmptyRemarkableViewState extends State<EmptyRemarkableView> {
   }
 }
 
-// === Painter cho illustration trong HTML ===
 // Accepts theme colors so the illustration blends with dark/light modes
 class MountainIllustrationPainter extends CustomPainter {
   final Color outlineColor;

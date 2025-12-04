@@ -2,9 +2,9 @@
 
 class MediaItem {
   int? id;
-  int observationId; // Khoá ngoại liên kết với Observation
-  String path; // Đường dẫn đến tệp (local file path)
-  String type; // 'image' hoặc 'video'
+  int observationId; // Foreign key linking to Observation
+  String path; // File path (local file path)
+  String type; // 'image' or 'video'
 
   MediaItem({
     this.id,
@@ -13,7 +13,7 @@ class MediaItem {
     required this.type,
   });
 
-  // Chuyển đổi đối tượng MediaItem thành Map
+  // Convert MediaItem object to Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -23,7 +23,7 @@ class MediaItem {
     };
   }
 
-  // Tạo đối tượng MediaItem từ Map
+  // Create MediaItem object from Map
   factory MediaItem.fromMap(Map<String, dynamic> map) {
     return MediaItem(
       id: map['id'] as int?,

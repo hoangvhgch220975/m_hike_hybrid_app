@@ -2,20 +2,19 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/weather_data.dart';
 import '../db/app_db.dart';
 
 /// Weather service for getting weather information (Feature 9: Weather API)
-/// Service lấy thông tin thời tiết
+/// Service for retrieving weather information
 class WeatherService {
-  // TODO: Replace with your real OpenWeatherMap API key
+  // Load API key and base URL from environment variables
   // Free registration at: https://openweathermap.org/api
-  // TODO: Thay bằng API key thật từ OpenWeatherMap
-  static const String _apiKey = '34d51ff87ee138e87f4d29821df44a86';
-  static const String _baseUrl = 'https://api.openweathermap.org/data/2.5';
+  static String get _apiKey => dotenv.env['WEATHER_API_KEY'] ?? '';
+  static String get _baseUrl => dotenv.env['WEATHER_API_BASE_URL'] ?? 'https://api.openweathermap.org/data/2.5';
 
   /// Get weather by coordinates (lat, lng)
-  /// Lấy thời tiết theo tọa độ
   Future<WeatherData?> getWeatherByCoordinates(double lat, double lng) async {
     try {
       final url = Uri.parse(
@@ -38,7 +37,6 @@ class WeatherService {
   }
 
   /// Get weather by city name
-  /// Lấy thời tiết theo tên thành phố
   Future<WeatherData?> getWeatherByCity(String cityName) async {
     try {
       final url = Uri.parse(
@@ -61,7 +59,6 @@ class WeatherService {
   }
 
   /// Get 5-day weather forecast (every 3 hours)
-  /// Lấy dự báo thời tiết 5 ngày (3 giờ/lần)
   Future<List<WeatherData>?> getForecast(double lat, double lng) async {
     try {
       final url = Uri.parse(
@@ -87,8 +84,6 @@ class WeatherService {
 
   /// Get weather forecast for a duration (number of days)
   /// Returns one forecast per day (preferably at 12:00 PM)
-  /// Lấy dự báo thời tiết cho khoảng thời gian (duration days)
-  /// Trả về 1 dự báo cho mỗi ngày (chọn dự báo lúc 12:00 PM)
   Future<List<WeatherData>?> getForecastForDuration(
     double lat,
     double lng,
@@ -142,7 +137,6 @@ class WeatherService {
   }
 
   /// Save weather forecast for a hike to database
-  /// Lưu dự báo thời tiết cho một hike vào database
   Future<bool> saveWeatherForecastForHike(
     int hikeId,
     double lat,
@@ -179,7 +173,6 @@ class WeatherService {
   }
 
   /// Get weather forecasts from database
-  /// Lấy dự báo thời tiết từ database
   Future<List<WeatherData>> getStoredWeatherForecasts(int hikeId) async {
     if (hikeId <= 0) {
       print('Invalid hikeId: $hikeId');
@@ -196,7 +189,6 @@ class WeatherService {
   }
 
   /// Save weather forecast for a hike to database (using location name)
-  /// Lưu dự báo thời tiết cho một hike vào database (sử dụng tên địa điểm)
   Future<bool> saveWeatherForecastForHikeByLocation(
     int hikeId,
     String locationName,
@@ -254,7 +246,6 @@ class WeatherService {
   }
 
   /// Check if weather is suitable for hiking
-  /// Kiểm tra thời tiết có phù hợp để đi hiking không
   bool isGoodForHiking(WeatherData weather) {
     // Điều kiện lý tưởng: 15-30°C, không mưa/bão, gió < 30 km/h
     bool goodTemp = weather.temperature >= 15 && weather.temperature <= 30;
@@ -267,7 +258,6 @@ class WeatherService {
   }
 
   /// Get hiking recommendation based on weather
-  /// Lấy khuyến nghị dựa trên thời tiết
   String getHikingRecommendation(WeatherData weather) {
     if (weather.condition.toLowerCase().contains('rain')) {
       return '🌧️ Not recommended. Roads may be slippery and dangerous.';
@@ -296,20 +286,17 @@ class WeatherService {
     return '⚠️ Weather is acceptable. Prepare well before going.';
   }
 
-  /// Format temperature
-  /// Format nhiệt độ
+  /// Format temperature string
   String formatTemperature(double temp) {
     return '${temp.toStringAsFixed(1)}°C';
   }
 
-  /// Format wind speed
-  /// Format tốc độ gió
+  /// Format wind speed string
   String formatWindSpeed(double speed) {
     return '${speed.toStringAsFixed(1)} km/h';
   }
 
-  /// Format humidity
-  /// Format độ ẩm
+  /// Format humidity string
   String formatHumidity(double humidity) {
     return '${humidity.toStringAsFixed(0)}%';
   }

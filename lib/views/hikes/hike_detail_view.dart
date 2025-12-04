@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../models/hike.dart';
 import '../../models/weather_data.dart';
-import '../../models/ai_suggestion.dart';
 import '../../db/app_db.dart';
 import '../../viewmodels/hike_viewmodel.dart';
 import '../../viewmodels/weather_viewmodel.dart';
@@ -402,7 +401,7 @@ class _HikeDetailViewState extends State<HikeDetailView> {
 
                       const SizedBox(height: 24),
 
-                      // AI Trip Advisor Button
+                      // AI Trip Advisor Button - Always visible
                       _buildAITripAdvisorButton(primary, theme),
 
                       const SizedBox(height: 24),
@@ -1128,8 +1127,8 @@ class _HikeDetailViewState extends State<HikeDetailView> {
           );
         }
       } else {
-        // No AI suggestion found, ask user if they want to generate one
-        _showGenerateDialog(context);
+        // No AI suggestion found, show info dialog
+        _showNoAISuggestionDialog(context);
       }
     } catch (e) {
       // Close loading dialog
@@ -1143,8 +1142,8 @@ class _HikeDetailViewState extends State<HikeDetailView> {
     }
   }
 
-  /// Show dialog asking user if they want to generate AI suggestion
-  void _showGenerateDialog(BuildContext context) {
+  /// Show dialog informing user that no AI suggestion exists for this hike
+  void _showNoAISuggestionDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1156,150 +1155,43 @@ class _HikeDetailViewState extends State<HikeDetailView> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                ),
+                color: Colors.blue[50],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.auto_awesome,
-                color: Colors.white,
+              child: Icon(
+                Icons.info_outline,
+                color: Colors.blue[700],
                 size: 24,
               ),
             ),
             const SizedBox(width: 12),
             const Expanded(
               child: Text(
-                'Generate AI Plan?',
+                'No AI Plan Available',
                 style: TextStyle(fontSize: 18),
               ),
             ),
           ],
         ),
         content: const Text(
-          'No AI suggestions found for this hike.\n\n'
-          'Would you like to generate personalized recommendations now?',
+          'AI has not planned this hike yet.\n\n'
+              'AI Trip Advisor is only available for previously planned hikes.',
           style: TextStyle(fontSize: 15, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _generateAISuggestion(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF667eea),
-              foregroundColor: Colors.white,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue[700],
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            icon: const Icon(Icons.auto_awesome, size: 20),
-            label: const Text('Generate'),
+            child: const Text('Close'),
           ),
         ],
       ),
     );
   }
 
-  /// Generate new AI suggestion
-  void _generateAISuggestion(BuildContext context) async {
-    if (_hike?.id == null) return;
-
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => WillPopScope(
-        onWillPop: () async => false,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'AI is analyzing your trip...',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'This may take a few seconds',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).hintColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    try {
-      // Generate AI suggestion
-      final suggestion = await AIService.generateAISuggestion(_hike!);
-
-      // Close loading dialog
-      if (context.mounted) Navigator.of(context).pop();
-
-      if (suggestion != null) {
-        // Navigate to detail page
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AISuggestionDetailPage(
-                suggestion: suggestion,
-                hike: _hike!,
-              ),
-            ),
-          );
-        }
-      } else {
-        _showErrorDialog(
-          context,
-          'Generation Failed',
-          'Failed to generate AI suggestion. Please try again.',
-        );
-      }
-    } catch (e) {
-      // Close loading dialog
-      if (context.mounted) Navigator.of(context).pop();
-
-      // Show error dialog
-      String errorMessage = 'An error occurred while generating AI suggestion.';
-      if (e.toString().contains('timeout')) {
-        errorMessage = 'The AI service is taking too long to respond. Please check your connection and try again.';
-      } else if (e.toString().contains('Connection') || e.toString().contains('SocketException')) {
-        errorMessage = 'Cannot connect to AI service.\n\n'
-            'Please make sure:\n'
-            '• Backend is running at localhost:8000\n'
-            '• Using correct URL (10.0.2.2:8000 for Android Emulator)\n'
-            '• Firewall is not blocking connection';
-      }
-
-      _showErrorDialog(context, 'Connection Error', errorMessage);
-    }
-  }
 
   /// Show error dialog
   void _showErrorDialog(BuildContext context, String title, String message) {
